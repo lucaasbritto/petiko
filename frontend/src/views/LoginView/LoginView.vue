@@ -1,57 +1,62 @@
 <template>
-  <div class="login-page d-flex align-items-center justify-content-center">
-    <div class="background-image"></div>
-
-    <div class="login-card p-5">
-      <div class="text-center mb-4">
-        <img src="/images/logo-petiko.svg" alt="Logo" class="logo" />
-        <p class="text-muted">Acesso ao portal do seu PET</p>
+  <div class="q-pa-md flex flex-center login-page">    
+    <q-card class="q-pa-xl login-card">
+      <div class="text-center q-mb-md">
+        <img src="/images/logo-petiko.svg" alt="Logo" class="logo q-mb-sm" />
+        <div class="text-grey">Acesso ao portal do seu PET</div>
       </div>
 
-      <form @submit.prevent="handleLogin" novalidate>
-        <div class="mb-4">
-          <label for="email" class="form-label fw-semibold">Email</label>
-          <input
-            v-model="email"
-            type="email"
-            class="form-control"
-            id="email"
-            placeholder="seu@email.com"
-            required
-            :disabled="loading"
-          />
-        </div>
+      <q-form @submit.prevent="handleLogin" class="q-gutter-md">
+        <q-input
+          v-model="email"
+          label="Email"
+          type="email"
+          filled
+          :disable="loading"
+          lazy-rules
+          :rules="[val => !!val || 'Campo obrigatório']"
+          stack-label
+        />
 
-        <div class="mb-5">
-          <label for="password" class="form-label fw-semibold">Senha</label>
-          <input
-            v-model="password"
-            type="password"
-            class="form-control"
-            id="password"
-            placeholder="********"
-            required
-            :disabled="loading"
-          />
-        </div>
+        <q-input
+          v-model="password"
+          label="Senha"
+          type="password"
+          :disable="loading"
+          filled
+          lazy-rules
+          :rules="[val => !!val || 'Campo obrigatório']"
+          stack-label
+        />
 
-        <button
+        <q-btn
           type="submit"
-          class="btn btn-primary w-100 fw-bold d-flex justify-content-center align-items-center"
-          :disabled="loading"
+          label="Entrar"
+          class="full-width btn-petiko"
+          :loading="loading"
+          :disable="loading"
+          no-caps
         >
-          <span v-if="!loading">Entrar</span>
-          <span v-else>
-            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <template v-slot:loading>
+            <q-spinner-dots size="20px" class="q-mr-sm" />
             Entrando...
-          </span>
-        </button>
+          </template>
+        </q-btn>
 
-        <div v-if="error" class="alert alert-danger mt-3" role="alert">{{ error }}</div>
-      </form>
+        <q-banner
+          v-if="error"
+          class="bg-red-2 text-red q-mt-md"
+          dense
+          rounded
+        >
+          {{ error }}
+        </q-banner>
+      </q-form>
 
-      <p class="text-center mt-4 text-muted" style="font-size: 0.85rem;">© 2025 Petiko</p>
-    </div>
+      <div class="text-center q-mt-md text-grey-6 text-caption">
+        © 2025 Petiko
+      </div>
+    </q-card>
   </div>
 </template>
 
