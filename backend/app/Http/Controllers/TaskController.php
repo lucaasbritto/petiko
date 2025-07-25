@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use App\Http\Requests\TaskRequest;
+use App\Http\Requests\UpdateTaskRequestStatusRequest;
 
 class TaskController extends Controller
 {
     
     public function index(Request $request){
-         $query = Task::where('user_id', auth()->id());
+       
+        $user = auth()->user();
+        $query = Task::with(['user']);
+
+        if (!$user->is_admin) {
+            $query->where('user_id', $user->id);
+        }       
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -30,8 +37,7 @@ class TaskController extends Controller
     }
     
        
-    public function store(TaskRequest $request)
-    {
+    public function store(TaskRequest $request){
        
         $input = $request->validated();
         $user = auth()->user();
@@ -48,12 +54,18 @@ class TaskController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Task  $task
-     * @return \Illuminate\Http\Response
-     */
+    public function updateStatus($id){
+
+        $task = Task::where('user_id', auth()->id())->findOrFail($id);
+        $task->is_done = !$task->is_done;
+        $task->save();
+
+        return response()->json([
+            'message' => 'Status atualizado com sucesso',
+            'data' => $task
+        ]);
+    }
+    
     public function show(Task $task)
     {
         //
@@ -70,26 +82,36 @@ class TaskController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Task $task)
-    {
-        //
+    
+    public function update(Request $request, Task $task){
+        if ($task->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Não autorizado'], 403);
+        }
+
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'due_date' => 'required|date|after_or_equal:today',
+            'is_done' => 'required|boolean',
+        ]);
+
+        $task->update($validatedData);
+
+        return response()->json([
+            'message' => 'Tarefa atualizada com sucesso',
+            'data' => $task
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Task $task)
-    {
-        //
+
+    public function destroy(Task $task){
+        $user = auth()->user();
+
+        if ($task->user_id !== $user->id && !$user->is_admin) {
+            return response()->json(['message' => 'Não autorizado'], 403);
+        }
+        $task->delete();
+
+        return response()->json(['message' => 'Tarefa removida com sucesso']);
     }
 }

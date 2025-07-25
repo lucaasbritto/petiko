@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getRequests, createRequest  } from '../api/requests'
+import { getRequests, createRequest, updateRequestStatus, deleteRequest, updateRequest   } from '../api/requests'
 
 export const useRequestStore = defineStore('requests', {
   state: () => ({
@@ -39,16 +39,48 @@ export const useRequestStore = defineStore('requests', {
      async createRequest(payload) {
       try {
         const created = await createRequest(payload)
-        this.requests.unshift(created)
-        
-        if (this.requests.length > this.pagination.perPage) {
-            this.requests.pop()
-        }
+        await this.fetchRequests(this.pagination.currentPage)
         
         return created
       } catch (e) {
         console.error('Erro ao criar a tarefa:', e)
         throw e
+      }
+    },
+
+    async updateStatus(id) {
+      try {       
+        const updated = await updateRequestStatus(id)
+        const index = this.requests.findIndex((r) => r.id === id)
+        if (index !== -1) {
+          this.requests.splice(index, 1, updated)
+        }
+      } catch (e) {
+        console.error('Erro ao atualizar status:', e)
+        throw e
+      }
+    },
+
+    async updateRequest(id, payload) {
+      try {
+        const updated = await updateRequest(id, payload)
+        const index = this.requests.findIndex((r) => r.id === id)
+        if (index !== -1) {
+          this.requests.splice(index, 1, updated)
+        }
+        return updated
+      } catch (e) {
+        console.error('Erro ao atualizar a tarefa:', e)
+        throw e
+      }
+    },
+
+    async removeTask(id) {
+      try {
+        await deleteRequest(id)
+        this.requests = this.requests.filter(r => r.id !== id)
+      } catch (e) {
+        console.error('Erro ao remover tarefa:', e)
       }
     },
 

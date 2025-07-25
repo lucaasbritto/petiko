@@ -13,5 +13,9 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('task')->group(function () {
         Route::get('/', [TaskController::class, 'index']);
         Route::post('/', [TaskController::class, 'store']);
+        Route::put('/{task}', [TaskController::class, 'update']);
+        Route::patch('/{id}/updateStatus', [TaskController::class, 'updateStatus']);
+        Route::delete('/{task}', [TaskController::class, 'destroy']);
+        
     });
 });

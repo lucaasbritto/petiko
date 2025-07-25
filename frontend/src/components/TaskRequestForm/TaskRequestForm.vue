@@ -8,6 +8,7 @@
         dense
         clearable
         class="full-width"
+        autofocus
         :rules="[val => !!val || 'Título é obrigatório']"
       />
 
@@ -34,6 +35,22 @@
         :min="minDate"
       />
 
+      <q-select
+        v-if="props.task"
+        v-model="form.is_done"
+        label="Status"
+        :options="[
+          { label: 'Pendente', value: false },
+          { label: 'Concluído', value: true }
+        ]"
+        emit-value
+        map-options
+        outlined
+        dense
+        autofocus
+        class="q-mb-md"
+      />
+
       <div class=" row justify-end q-gutter-sm q-mt-md">
         <q-btn
           label="Cancelar"
@@ -43,7 +60,7 @@
           :disable="loading"
         />
         <q-btn
-          label="Salvar"
+          :label="props.task ? 'Editar' : 'Salvar'"
           color="primary"
           type="submit"
           dense
@@ -56,10 +73,14 @@
 </template>
 
 <script setup>
-import { defineEmits } from 'vue'
+import { defineEmits, defineProps } from 'vue'
 import { useTaskRequestFormScript } from './TaskRequestForm.js'
 
 const emit = defineEmits(['close', 'saved'])
+const props = defineProps({
+  task: Object
+})
+
 const {
   form,
   loading,
@@ -67,7 +88,8 @@ const {
   validateDate,
   minDate,
   submitForm
-} = useTaskRequestFormScript(emit)
+} = useTaskRequestFormScript(emit, props)
+
 </script>
 
 <style scoped>

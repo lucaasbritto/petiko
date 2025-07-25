@@ -1,7 +1,8 @@
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, watch } from 'vue'
 import { useRequestStore } from '../../stores/requests'
+import { Notify } from 'quasar'
 
-export function useTaskRequestFormScript(emit) {
+export function useTaskRequestFormScript(emit, props) {
   const requestStore = useRequestStore()
   const loading = ref(false)
 
@@ -12,9 +13,22 @@ export function useTaskRequestFormScript(emit) {
   const form = reactive({
     title: '',
     description: '',
-    due_date: ''
+    due_date: '',
+    is_done: false 
   })
 
+  watch(() => props.task, (newTask) => {
+    if (newTask) {
+      form.title = newTask.title || ''
+      form.description = newTask.description || ''
+      form.due_date = newTask.due_date ? newTask.due_date.split('T')[0] : ''
+      form.is_done = newTask.is_done
+    } else {
+      form.title = ''
+      form.description = ''
+      form.due_date = ''
+    }
+  }, { immediate: true })
  
   function validateDate(val) {
     if (!val) return 'Data é obrigatória'
@@ -39,14 +53,36 @@ export function useTaskRequestFormScript(emit) {
   })
 
   async function submitForm() {
-    if (!formIsValid.value) return
+    if (!formIsValid.value) {
+      Notify.create({
+        type: 'negative',
+        message: 'Preencha todos os campos corretamente!'
+      })
+      return
+    }
 
     loading.value = true
     try {
-      await requestStore.createRequest(form)
+      if (props.task && props.task.id) {        
+        await requestStore.updateRequest(props.task.id, form)
+        Notify.create({
+          type: 'positive',
+          message: 'Tarefa atualizada com sucesso!'
+        })
+      } else {
+        await requestStore.createRequest(form)
+        Notify.create({
+          type: 'positive',
+          message: 'Tarefa criada com sucesso!'
+        })
+      }
       emit('saved')
     } catch (e) {
       console.error('Erro ao salvar:', e)
+      Notify.create({
+        type: 'negative',
+        message: 'Erro ao salvar a tarefa.'
+      })
     } finally {
       loading.value = false
     }

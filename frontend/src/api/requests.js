@@ -9,3 +9,18 @@ export async function createRequest(data) {
   const response = await api.post('/task', data);
   return response.data.data;
 }
+
+export async function updateRequest(id, payload) {
+  const response = await api.put(`/task/${id}`, payload)
+  return response.data.data
+}
+
+export async function updateRequestStatus(id) {
+  const response = await api.patch(`/task/${id}/updateStatus`)
+  return response.data.data
+}
+
+export async function deleteRequest(id) {
+   const response = await api.delete(`/task/${id}`)
+   return response.data.data
+}

@@ -58,4 +58,8 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Task::class);
     }
+
+     public function isAdmin(){
+       return (bool) $this->is_admin;
+    }
 }
