@@ -1,59 +1,71 @@
 <template>
-  <div id="app">
-    <header 
-        v-if="!isLoginPage && userStore.isAuthenticated"
-        class="app-header bg-white shadow-sm px-4 py-3 d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Petiko</h5>
+  <q-layout view="hHh lpR fFf">
+    <q-header v-if="!isLoginPage && userStore.isAuthenticated" elevated class="my-header">
+      <q-toolbar class="q-px-md q-py-sm justify-between">
+          <q-img
+            src="/images/logo-petiko.svg"
+            alt="Logo"
+            style="height: 32px; width: 100px;"
+            no-spinner
+            no-transition
+            class="q-mr-auto"
+          />
 
-      <div v-if="userStore.isAuthenticated" class="d-flex align-items-center gap-3">
-        <span>Olá, {{ userStore.userName }}</span>
-        <button class="btn btn-outline-danger btn-sm" @click="logout">Sair</button>
-      </div>
-    </header>
+        <div class="row items-center q-gutter-sm">          
+          <div class="q-mr-md">Bem-vindo, {{ userStore.userName }}</div>
+          <q-btn flat dense round icon="logout" @click="logout" title="Sair" />
+        </div>
+      </q-toolbar>
+    </q-header>
 
-    <main>
+    <q-page-container>
       <router-view />
-    </main>
-  </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted } from 'vue'
-import { useUserStore } from './stores/user.js'
+import { computed, watch, onMounted } from 'vue'
+import { useUserStore } from './stores/user'
 
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 const isLoginPage = computed(() => route.name === 'Login')
 
-onMounted(() => {
-  if (userStore.isAuthenticated && !userStore.user) {
-    userStore.fetchUser()
-  }
-})
 
-const logout = () => {
+function logout () {
   userStore.logout()
   router.push('/login')
 }
+
+onMounted(async () => {
+  if (userStore.isAuthenticated) {
+    if (!userStore.user) {
+      await userStore.fetchUser()
+    }
+  }  
+})
+
+watch(() => userStore.isAuthenticated, async (newVal) => {
+  if (newVal) {
+    if (!userStore.user) {
+      await userStore.fetchUser()
+    }
+  }
+})
 </script>
 
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #f9f9f9;
+.scroll {
+  overflow-y: auto;
 }
 
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-main {
-  min-height: 100vh;
+.my-header {
+  background-color: white !important;
+  color: #0083a0 !important;
+  font-weight: bold;
 }
 </style>

@@ -1,125 +1,150 @@
 <template>
-  <div class="q-pa-md dashboard flex flex-center">
-    <div class="full-width" style="max-width: 1000px">
-      <q-card class="q-pa-md q-mb-md shadow-2">
-        <div class="row q-col-gutter-sm items-end">
-          <div class="col-md-5 col-12">
-            <q-input
-              v-model="filters.search"
-              label="Título ou Descrição"
-              dense
-              outlined
-              rounded
-              debounce="300"
-              @update:model-value="applyFilter('search', filters.search)"
-            />
+  <q-layout>    
+    <q-drawer
+      show-if-above
+      bordered
+      :width="280"
+      class="bg-filter text-white"
+    >
+      <div class="q-pa-md">
+          <div class="row items-center q-mb-md" style="color: white; font-weight: bold;">
+            <q-icon name="filter_list" size="20px" class="q-mr-sm" />
+            <div class="text-h6">Filtro</div>
           </div>
-          <div class="col-md-4 col-12">
-            <q-input
-              v-model="filters.due_date"
-              label="Data de Vencimento"
-              type="date"
-              dense
-              outlined
-              rounded
-              @update:model-value="applyFilter('due_date', filters.due_date)"
-            />
-          </div>
-          <div class="col-md-3 col-12">
-            <q-select
-              v-model="filters.is_done"
-              label="Situação"
-              dense
-              outlined
-              rounded
-              emit-value
-              map-options
-              :options="[
-                { label: 'Todos', value: '' },
-                { label: 'Concluída', value: '1' },
-                { label: 'Pendente', value: '0' }
-              ]"
-              @update:model-value="applyFilter('is_done', filters.is_done)"
-            />
-          </div>
-        </div>
-      </q-card>
 
-      <div class="q-mb-md text-right">
+        <q-input
+          v-model="filters.search"
+          label="Título ou Descrição"
+          class="inputFilter"
+          dense
+          outlined
+          clearable
+          autofocus
+          @update:model-value="applyFilter('search', filters.search)"
+        />
+
+        
+        <q-input
+          v-model="filters.due_date"
+          label="Data de Vencimento"
+          type="date"
+          class="inputFilter q-mt-sm"
+          dense
+          outlined
+          clearable
+          autofocus
+          @update:model-value="applyFilter('due_date', filters.due_date)"
+        />
+
+        <q-select
+          v-model="filters.is_done"
+          label="Situação"
+          dense
+          outlined
+          emit-value
+          map-options
+          autofocus
+          class="inputFilter q-mt-sm"
+          :options="[
+            { label: 'Todos', value: '' },
+            { label: 'Concluída', value: '1' },
+            { label: 'Pendente', value: '0' }
+          ]"
+          @update:model-value="applyFilter('is_done', filters.is_done)"
+        />
+      </div>
+    </q-drawer>
+    
+    <q-page-container class="pageContainer">      
+      <div class="row justify-center">        
+        <div class="col-12 col-md-8 q-mt-md">
+         <div class="row justify-end q-mb-md">
         <q-btn
           v-if="userStore.isAdmin"
           label="Nova Tarefa"
           icon="add"
-          color="primary"
-          size="sm"
-          dense
-          rounded
-          unelevated
+          style="background: #0083a0; color: white"
           @click="openTaskDialog"
+          unelevated
+          rounded
+          dense
         />
       </div>
 
-      <q-card flat bordered>
-        <q-table
-          :rows="requestStore.requests.filter(r => r && r.id)"
-          :columns="columns"
-          row-key="id"
-          dense
-          flat
-          bordered
-          class="shadow-1"
-          :loading="requestStore.loading"
-          :pagination.sync="pagination"
-          :rows-per-page="10"
-          :rows-per-page-options="[10,20,50, 100]"          
-        >
-          <template v-slot:body-cell-is_done="props">
-            <q-td :props="props">
-              <q-badge
-                :color="getStatusColor(props.row)"
-                rounded
-              >
-                {{ getStatusLabel(props.row) }}
-              </q-badge>
-            </q-td>
-            <q-td align="center">
-              <q-btn
-                  v-if="userStore.isAdmin" 
-                  dense
-                  flat
-                  round
-                  icon="edit"
-                  color="blue"
-                  @click="openEditDialog(props.row)"
-                  title="Editar tarefa"
-                />
-              <q-btn
-                v-if="!props.row.is_done"
-                dense
-                flat
-                round
-                icon="done"
-                color="green"
-                @click="confirmUpdated(props.row.id)"
-                :title="props.row.is_done ? 'Desmarcar como concluída' : 'Marcar como concluída'"
-              />
-              <q-btn
-                dense
-                flat
-                round
-                icon="delete"
-                color="red"
-                @click="confirmRemove(props.row.id)"
-                title="Remover tarefa"
-              />
-            </q-td>
-          </template>
+          <q-card flat bordered class="q-pt-md" style="">
+            <q-table
+              :rows="requestStore.requests.filter(r => r && r.id)"
+              title="Tarefas"
+              :columns="columns"
+              row-key="id"
+              dense
+              flat bordered
+              class="shadow-1 my-table"
+              :loading="requestStore.loading"
+              :pagination.sync="pagination"
+              :rows-per-page="10"
+              :rows-per-page-options="[10, 20, 50, 100]"
+              style="color: #0083a0"
+            >
+              <template v-slot:body-cell-is_done="props">
+                <q-td :props="props">
+                  <q-badge :color="getStatusColor(props.row)" rounded>
+                    {{ getStatusLabel(props.row) }}
+                  </q-badge>
+                </q-td>
+              </template>
 
-          <template v-slot:no-data>
-            <div class="text-center text-grey q-pa-md">Nenhuma tarefa encontrada.</div>
-          </template>
-        </q-table>
-      </q-card>
+              <template v-slot:body-cell-actions="props">
+                <q-td class="q-pa-none" align="center">
+                   <div class="row no-wrap items-center justify-center q-gutter-xs">                  
+                    <q-btn
+                      v-if="userStore.isAdmin" 
+                      dense
+                      flat
+                      round
+                      icon="edit"
+                      color="blue"
+                      @click="openEditDialog(props.row)"
+                      title="Editar tarefa"
+                    />
+                    
+                    <q-separator v-if="userStore.isAdmin" vertical inset/>
+                                     
+                    <q-btn
+                      v-if="!props.row.is_done"
+                      dense
+                      flat
+                      round
+                      icon="done"
+                      color="green"
+                      @click="confirmUpdated(props.row.id)"
+                      title="Marcar como concluída"
+                    />
+                    
+                    <q-separator v-if="!props.row.is_done" vertical inset/>
+
+                  <q-btn
+                    dense
+                    flat
+                    round
+                    icon="delete"
+                    color="red"
+                    @click="confirmRemove(props.row.id)"
+                    title="Remover tarefa"
+                  />
+                  </div>
+                </q-td>
+              </template>
+
+              <template v-slot:no-data>
+                <div class="text-center text-grey q-pa-md">
+                  Nenhuma tarefa encontrada.
+                </div>
+              </template>
+            </q-table>
+          </q-card>
+        </div>
+      </div>
 
       <div class="q-mt-md flex justify-center" v-if="pagination.lastPage > 1">
         <q-pagination
@@ -131,22 +156,19 @@
           @update:model-value="requestStore.changePage"
         />
       </div>
-    </div>
-  </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useDashboardScript } from './DashboardView.js'
-import { Dialog, Loading, Notify   } from 'quasar'
-import { useQuasar } from 'quasar'
+import { Dialog, Loading, Notify } from 'quasar'
 import TaskRequestFormDialog from '../../components/TaskRequestFormDialog.vue'
 import { useUserStore } from '../../stores/user'
 
 const editingTask = ref(null)
 const userStore = useUserStore()
-
-const $q = useQuasar()
 
 const {
   requestStore,
@@ -169,16 +191,11 @@ onMounted(() => {
   requestStore.fetchRequests()
 })
 
-function openTaskDialog() {  
+function openTaskDialog() {
   Dialog.create({
-  component: TaskRequestFormDialog,
-  componentProps: {
-    persistent: true,
-  }
-}).onOk(() => {
-}).onCancel(() => {
-}).onDismiss(() => {
-})
+    component: TaskRequestFormDialog,
+    componentProps: { persistent: true }
+  })
 }
 
 function openEditDialog(task) {
@@ -189,7 +206,6 @@ function openEditDialog(task) {
       persistent: true,
       task: editingTask.value
     }
-  }).onOk(() => {
   }).onCancel(() => {
     editingTask.value = null
   }).onDismiss(() => {
@@ -204,14 +220,8 @@ function confirmAction(message = 'Tem certeza?') {
       message,
       cancel: true,
       persistent: true,
-      ok: {
-        label: 'Confirmar',
-        color: 'primary'
-      },
-      cancel: {
-        label: 'Cancelar',
-        color: 'negative'
-      }
+      ok: { label: 'Confirmar', color: 'primary' },
+      cancel: { label: 'Cancelar', color: 'negative' }
     })
       .onOk(() => resolve(true))
       .onCancel(() => resolve(false))
@@ -227,23 +237,14 @@ async function confirmUpdated(id) {
 
   try {
     await requestStore.updateStatus(id)
-    Notify.create({
-      type: 'positive',
-      message: 'Situação alterada com sucesso!',
-      timeout: 2500
-    })
+    Notify.create({ type: 'positive', message: 'Situação alterada com sucesso!', timeout: 2500 })
   } catch (e) {
     console.error('Erro ao atualizar status', e)
-    Notify.create({
-      type: 'negative',
-      message: 'Erro ao atualizar a tarefa.',
-      timeout: 3000
-    })
+    Notify.create({ type: 'negative', message: 'Erro ao atualizar a tarefa.', timeout: 3000 })
   } finally {
     Loading.hide()
   }
 }
-
 
 async function confirmRemove(id) {
   const confirmed = await confirmAction('Deseja remover esta tarefa?')
@@ -253,23 +254,14 @@ async function confirmRemove(id) {
 
   try {
     await requestStore.removeTask(id)
-    Notify.create({
-      type: 'positive',
-      message: 'Tarefa removida com sucesso!',
-      timeout: 2500
-    })
+    Notify.create({ type: 'positive', message: 'Tarefa removida com sucesso!', timeout: 2500 })
   } catch (e) {
     console.error('Erro ao remover tarefa', e)
-    Notify.create({
-      type: 'negative',
-      message: 'Erro ao remover a tarefa.',
-      timeout: 3000
-    })
+    Notify.create({ type: 'negative', message: 'Erro ao remover a tarefa.', timeout: 3000 })
   } finally {
     Loading.hide()
   }
 }
-
 
 function isVencida(task) {
   return !task.is_done && new Date(task.due_date) < new Date()
@@ -284,9 +276,41 @@ function getStatusColor(task) {
   if (isVencida(task)) return 'red'
   return task.is_done ? 'green' : 'orange'
 }
-
 </script>
 
-<style lang="scss" scoped>
-@use './DashboardView.scss';
+<style>
+.bg-filter {
+  background-color: #0083a0 !important;
+  color: white;
+}
+
+.my-table thead tr {
+  background-color: #0083a0; 
+  color: white;
+}
+
+.table-wrapper {
+  max-width: 300px !important; 
+  margin: 0 auto;
+}
+
+.my-table {
+  font-size: 0.85rem; 
+}
+
+.inputFilter {
+  background:  white !important;
+  color: white !important;
+}
+
+.pageContainer {
+  min-height: 100vh;
+  position: relative;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    url('/images/bg-petiko.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 </style>
