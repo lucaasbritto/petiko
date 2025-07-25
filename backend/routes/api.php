@@ -12,5 +12,6 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('task')->group(function () {
         Route::get('/', [TaskController::class, 'index']);
+        Route::post('/', [TaskController::class, 'store']);
     });
 });

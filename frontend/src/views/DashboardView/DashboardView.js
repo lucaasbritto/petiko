@@ -4,7 +4,7 @@ import { useRequestStore } from '../../stores/requests'
 export function useDashboardScript() {
   const requestStore = useRequestStore()
   const filters = reactive(requestStore.filters)
-  const pagination = computed(() => requestStore.pagination)
+  const pagination = reactive(requestStore.pagination)
 
   let debounceTimeout
   watch(() => filters.search, (newVal) => {
@@ -19,13 +19,10 @@ export function useDashboardScript() {
   }
 
   function formatDateBR(dateStr) {
-    const date = new Date(dateStr)
-    if (isNaN(date)) return ''
-    return new Intl.DateTimeFormat('pt-BR').format(date)
-  }
-
-  function criarTarefa() {
-    //
+    if (!dateStr) return ''
+    
+    const [year, month, day] = dateStr.split('T')[0].split('-')
+    return `${day}/${month}/${year}`
   }
 
   return {
@@ -34,6 +31,5 @@ export function useDashboardScript() {
     pagination,
     applyFilter,
     formatDateBR,
-    criarTarefa
   }
 }

@@ -54,7 +54,7 @@
           dense
           rounded
           unelevated
-          @click="criarTarefa"
+          @click="openTaskDialog"
         />
       </div>
 
@@ -68,7 +68,9 @@
           bordered
           class="shadow-1"
           :loading="requestStore.loading"
-          hide-bottom
+          :pagination.sync="pagination"
+          :rows-per-page="10"
+          :rows-per-page-options="[10,20,50, 100]"          
         >
           <template v-slot:body-cell-is_done="props">
             <q-td :props="props">
@@ -101,6 +103,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useDashboardScript } from './DashboardView.js'
+import { Dialog } from 'quasar'
+import { useQuasar } from 'quasar'
+import TaskRequestFormDialog from '../../components/TaskRequestFormDialog.vue'
+
+const $q = useQuasar()
 
 const {
   requestStore,
@@ -108,7 +115,6 @@ const {
   pagination,
   applyFilter,
   formatDateBR,
-  criarTarefa
 } = useDashboardScript()
 
 const columns = [
@@ -122,6 +128,19 @@ const columns = [
 onMounted(() => {
   requestStore.fetchRequests()
 })
+
+function openTaskDialog() {  
+  Dialog.create({
+  component: TaskRequestFormDialog,
+  componentProps: {
+    persistent: true,
+  }
+}).onOk(() => {
+}).onCancel(() => {
+}).onDismiss(() => {
+})
+}
+
 </script>
 
 <style lang="scss" scoped>

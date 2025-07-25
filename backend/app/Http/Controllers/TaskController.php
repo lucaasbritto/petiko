@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use App\Http\Requests\TaskRequest;
 
 class TaskController extends Controller
 {
     
-    public function index(Request $request)
-    {
+    public function index(Request $request){
          $query = Task::where('user_id', auth()->id());
 
         if ($request->filled('search')) {
@@ -17,8 +17,8 @@ class TaskController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%");
-        });
-    }
+            });
+        }
         $query->when($request->filled('due_date'), fn($q) => $q->whereDate('due_date', '=', $request->due_date));
         $query->when($request->filled('is_done'), fn($q) => $q->where('is_done', $request->is_done));
 
@@ -28,26 +28,24 @@ class TaskController extends Controller
 
         return response()->json($requests);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    
+       
+    public function store(TaskRequest $request)
     {
-        //
-    }
+       
+        $input = $request->validated();
+        $user = auth()->user();
+         
+        $task = $user->tasks()->create([
+            'title'     => $input['title'],
+            'description'    => $input['description'],
+            'due_date'  => $input['due_date'],
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+       return response()->json([
+            'message' => 'Nova tarefa criada com sucesso.',
+            'data'    => $task,
+        ], 201);
     }
 
     /**

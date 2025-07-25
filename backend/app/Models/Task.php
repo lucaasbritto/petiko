@@ -12,4 +12,14 @@ class Task extends Model
     protected $fillable = [
          'title', 'description', 'due_date', 'is_done', 'user_id'
     ];
+
+    protected $casts = [
+        'is_done' => 'boolean',
+        'due_date' => 'date',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
