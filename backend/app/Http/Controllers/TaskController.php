@@ -13,7 +13,7 @@ class TaskController extends Controller
     public function index(Request $request){
        
         $user = auth()->user();
-        $query = Task::with(['user']);
+        $query = Task::with('user');
 
         if (!$user->is_admin) {
             $query->where('user_id', $user->id);
@@ -38,14 +38,12 @@ class TaskController extends Controller
     
        
     public function store(TaskRequest $request){
-       
-        $input = $request->validated();
-        $user = auth()->user();
-         
-        $task = $user->tasks()->create([
-            'title'     => $input['title'],
-            'description'    => $input['description'],
-            'due_date'  => $input['due_date'],
+       $input = $request->validated();
+       $task = Task::create([
+            'title'       => $input['title'],
+            'description' => $input['description'],
+            'due_date'    => $input['due_date'],
+            'user_id'     => $input['user_id']
         ]);
 
        return response()->json([

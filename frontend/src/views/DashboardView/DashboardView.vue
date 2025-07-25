@@ -187,8 +187,21 @@ const columns = [
   { name: 'actions', label: 'Ações', field: 'actions', align: 'center' }
 ]
 
+if (userStore.isAdmin) {
+  columns.splice(5, 0, {
+    name: 'user_id',
+    label: 'Responsável',
+    field: row => row.user?.name || '-',
+    align: 'left',
+  })
+}
+
 onMounted(() => {
   requestStore.fetchRequests()
+
+  if (userStore.isAdmin) {
+    userStore.fetchUsuarios()
+  }
 })
 
 function openTaskDialog() {

@@ -36,6 +36,20 @@
       />
 
       <q-select
+        v-model="form.user_id"
+        :options="usuarios"
+        label="Atribuir para"
+        option-label="name"
+        option-value="id"
+        outlined
+        dense
+        emit-value
+        map-options
+        required
+        class="q-mb-md"
+      />
+
+      <q-select
         v-if="props.task"
         v-model="form.is_done"
         label="Status"
@@ -75,11 +89,15 @@
 <script setup>
 import { defineEmits, defineProps } from 'vue'
 import { useTaskRequestFormScript } from './TaskRequestForm.js'
+import { useUserStore } from '../../stores/user'
 
 const emit = defineEmits(['close', 'saved'])
 const props = defineProps({
   task: Object
 })
+
+const userStore = useUserStore()
+const usuarios = userStore.usuarios
 
 const {
   form,

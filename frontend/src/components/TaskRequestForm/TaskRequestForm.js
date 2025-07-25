@@ -14,7 +14,8 @@ export function useTaskRequestFormScript(emit, props) {
     title: '',
     description: '',
     due_date: '',
-    is_done: false 
+    is_done: false,
+    user_id: '',
   })
 
   watch(() => props.task, (newTask) => {
@@ -23,6 +24,7 @@ export function useTaskRequestFormScript(emit, props) {
       form.description = newTask.description || ''
       form.due_date = newTask.due_date ? newTask.due_date.split('T')[0] : ''
       form.is_done = newTask.is_done
+      form.user_id = newTask.user_id
     } else {
       form.title = ''
       form.description = ''
