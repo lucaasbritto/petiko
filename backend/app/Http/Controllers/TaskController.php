@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\TaskRequest;
 use App\Http\Requests\UpdateTaskRequestStatusRequest;
+use App\Notifications\TaskNotification;
 
 class TaskController extends Controller
 {
@@ -45,6 +47,11 @@ class TaskController extends Controller
             'due_date'    => $input['due_date'],
             'user_id'     => $input['user_id']
         ]);
+
+        $user = User::find($task->user_id);
+        if ($user) {
+        $user->notify(new TaskNotification($task));
+    }
 
        return response()->json([
             'message' => 'Nova tarefa criada com sucesso.',

@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\User\UserController;
-
+use App\Http\Controllers\NotificationController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
@@ -18,6 +18,12 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/{id}/updateStatus', [TaskController::class, 'updateStatus']);
         Route::delete('/{task}', [TaskController::class, 'destroy']);
         
+    });
+
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::patch('/read', [NotificationController::class, 'markAllAsRead']);
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead']);
     });
 
     Route::get('/users', [UserController::class, 'index']);
