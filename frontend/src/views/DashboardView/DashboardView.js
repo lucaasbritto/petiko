@@ -48,7 +48,15 @@ export function useDashboardScript() {
   }
 
   function isVencida(task) {
-    return !task.is_done && new Date(task.due_date) < new Date()
+    if (task.is_done) return false
+
+    const today = new Date()
+    const due = new Date(task.due_date)
+
+    const todayStr = today.toISOString().slice(0, 10)
+    const dueStr = due.toISOString().slice(0, 10)
+
+    return dueStr < todayStr
   }
 
   function getStatusLabel(task) {
