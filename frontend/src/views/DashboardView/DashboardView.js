@@ -62,14 +62,18 @@ export function useDashboardScript() {
   }
 
   async function confirmAction(message = 'Tem certeza?') {
-    return await Dialog.create({
-      title: 'Confirmação',
-      message,
-      cancel: true,
-      persistent: true,
-      ok: { label: 'Confirmar', color: 'primary' },
-      cancel: { label: 'Cancelar', color: 'negative' }
-    }).onOk(() => true).onCancel(() => false).onDismiss(() => false)
+    return new Promise(resolve => {
+      Dialog.create({
+        title: 'Confirmação',
+        message,
+        cancel: true,
+        persistent: true,
+        ok: { label: 'Confirmar', color: 'primary' },
+        cancel: { label: 'Cancelar', color: 'negative' }
+      }).onOk(() => resolve(true))
+        .onCancel(() => resolve(false))
+        .onDismiss(() => resolve(false))
+    })
   }
 
   async function confirmUpdated(id) {
