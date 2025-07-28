@@ -1,0 +1,41 @@
+.bg-filter {
+  background-color: #0083a0 !important;
+  color: white;
+}
+
+.my-table thead tr {
+  background-color: #0083a0; 
+  color: white;
+}
+
+.table-wrapper {
+  max-width: 300px !important; 
+  margin: 0 auto;
+}
+
+.my-table {
+  font-size: 0.85rem; 
+}
+
+.inputFilter {
+  background:  white !important;
+  color: white !important;
+}
+
+.pageContainer {
+  min-height: 100vh;
+  position: relative;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    url('/images/bg-petiko.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.truncate-text {
+  max-width: 10vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

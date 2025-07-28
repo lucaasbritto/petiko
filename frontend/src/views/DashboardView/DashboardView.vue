@@ -190,188 +190,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
 import { useDashboardScript } from './DashboardView.js'
-import { Dialog, Loading, Notify } from 'quasar'
-import TaskRequestFormDialog from '../../components/TaskRequestFormDialog.vue'
 import TaskViewDialog from '../../components/TaskViewDialog.vue'
-import { useUserStore } from '../../stores/user'
-
-const editingTask = ref(null)
-const userStore = useUserStore()
-const taskViewOpen = ref(false)
-const taskToView = ref(null)
-
-function openTaskView(task) {
-  taskToView.value = task
-  taskViewOpen.value = true
-}
 
 const {
+  userStore,
   requestStore,
   filters,
   pagination,
+  columns,
   applyFilter,
   formatDateBR,
+  getStatusColor,
+  getStatusLabel,
+  openTaskDialog,
+  openEditDialog,
+  confirmUpdated,
+  confirmRemove,
+  taskViewOpen,
+  taskToView,
+  openTaskView,
 } = useDashboardScript()
-
-const columns = computed(() => {
-  const base = [
-    { name: 'id', label: 'ID', field: 'id', align: 'left' },
-    { name: 'title', label: 'Título', field: 'title', align: 'left' },
-    { name: 'description', label: 'Descrição', field: 'description', align: 'left' },
-    { name: 'due_date', label: 'Data', field: row => formatDateBR(row.due_date), align: 'left' },
-    { name: 'is_done', label: 'Situação', field: 'is_done', align: 'left' },
-    { name: 'actions', label: 'Ações', field: 'actions', align: 'center' }
-  ]
-
-if (userStore.isAdmin) {
-    base.splice(5, 0, {
-      name: 'user_id',
-      label: 'Responsável',
-      field: row => row.user?.name || '-',
-      align: 'left',
-    })
-  }
-
-  return base
-})
-
-onMounted(() => {
-  requestStore.fetchRequests()
-
-  if (userStore.isAdmin) {
-    userStore.fetchUsuarios()
-  }
-})
-
-function openTaskDialog() {
-  Dialog.create({
-    component: TaskRequestFormDialog,
-    componentProps: { persistent: true }
-  })
-}
-
-function openEditDialog(task) {
-  editingTask.value = task
-  Dialog.create({
-    component: TaskRequestFormDialog,
-    componentProps: {
-      persistent: true,
-      task: editingTask.value
-    }
-  }).onCancel(() => {
-    editingTask.value = null
-  }).onDismiss(() => {
-    editingTask.value = null
-  })
-}
-
-function confirmAction(message = 'Tem certeza?') {
-  return new Promise((resolve) => {
-    Dialog.create({
-      title: 'Confirmação',
-      message,
-      cancel: true,
-      persistent: true,
-      ok: { label: 'Confirmar', color: 'primary' },
-      cancel: { label: 'Cancelar', color: 'negative' }
-    })
-      .onOk(() => resolve(true))
-      .onCancel(() => resolve(false))
-      .onDismiss(() => resolve(false))
-  })
-}
-
-async function confirmUpdated(id) {
-  const confirmed = await confirmAction('Deseja marcar esta tarefa como concluída?')
-  if (!confirmed) return
-
-  Loading.show({ message: 'Atualizando tarefa...' })
-
-  try {
-    await requestStore.updateStatus(id)
-    Notify.create({ type: 'positive', message: 'Situação alterada com sucesso!', timeout: 2500 })
-  } catch (e) {
-    console.error('Erro ao atualizar status', e)
-    Notify.create({ type: 'negative', message: 'Erro ao atualizar a tarefa.', timeout: 3000 })
-  } finally {
-    Loading.hide()
-  }
-}
-
-async function confirmRemove(id) {
-  const confirmed = await confirmAction('Deseja remover esta tarefa?')
-  if (!confirmed) return
-
-  Loading.show({ message: 'Removendo tarefa...' })
-
-  try {
-    await requestStore.removeTask(id)
-    Notify.create({ type: 'positive', message: 'Tarefa removida com sucesso!', timeout: 2500 })
-  } catch (e) {
-    console.error('Erro ao remover tarefa', e)
-    Notify.create({ type: 'negative', message: 'Erro ao remover a tarefa.', timeout: 3000 })
-  } finally {
-    Loading.hide()
-  }
-}
-
-function isVencida(task) {
-  return !task.is_done && new Date(task.due_date) < new Date()
-}
-
-function getStatusLabel(task) {
-  if (isVencida(task)) return 'Vencida'
-  return task.is_done ? 'Concluída' : 'Pendente'
-}
-
-function getStatusColor(task) {
-  if (isVencida(task)) return 'red'
-  return task.is_done ? 'green' : 'orange'
-}
 </script>
 
-<style>
-.bg-filter {
-  background-color: #0083a0 !important;
-  color: white;
-}
-
-.my-table thead tr {
-  background-color: #0083a0; 
-  color: white;
-}
-
-.table-wrapper {
-  max-width: 300px !important; 
-  margin: 0 auto;
-}
-
-.my-table {
-  font-size: 0.85rem; 
-}
-
-.inputFilter {
-  background:  white !important;
-  color: white !important;
-}
-
-.pageContainer {
-  min-height: 100vh;
-  position: relative;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
-    url('/images/bg-petiko.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.truncate-text {
-  max-width: 10vw;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+<style lang="scss" >
+    @use './DashboardView.scss';  
 </style>
