@@ -16,21 +16,21 @@ class TaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'     => 'required|string|max:255',
-            'description'     => 'required|string|max:255',
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'due_date'    => 'required|date|after_or_equal:today',
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id'     => 'required|integer|exists:users,id',
         ];
     }
 
     public function messages()
     {
         return [
-            'title.required' => 'O Titulo é obrigatório.',
-            'description.required' => 'A Descrição é obrigatória.',
-            'due_date.required' => 'A Data de Vencimento é obrigatória.',
+            'title.required'          => 'O Titulo é obrigatório.',
+            'description.required'    => 'A Descrição é obrigatória.',
+            'due_date.required'       => 'A Data de Vencimento é obrigatória.',
             'due_date.after_or_equal' => 'A Data de Vencimento deve ser hoje ou uma data futura.',
-            'user_id.required' => 'O Responsável é Obrigatório',
+            'user_id.required'        => 'O Responsável é Obrigatório',
         ];
     }
 }

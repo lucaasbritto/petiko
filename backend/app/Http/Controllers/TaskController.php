@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\TaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Requests\UpdateTaskRequestStatusRequest;
 use App\Notifications\TaskNotification;
 
@@ -41,17 +42,12 @@ class TaskController extends Controller
        
     public function store(TaskRequest $request){
        $input = $request->validated();
-       $task = Task::create([
-            'title'       => $input['title'],
-            'description' => $input['description'],
-            'due_date'    => $input['due_date'],
-            'user_id'     => $input['user_id']
-        ]);
+       $task = Task::create($input);
 
         $user = User::find($task->user_id);
         if ($user) {
-        $user->notify(new TaskNotification($task));
-    }
+            $user->notify(new TaskNotification($task));
+        }
 
        return response()->json([
             'message' => 'Nova tarefa criada com sucesso.',
@@ -71,36 +67,23 @@ class TaskController extends Controller
         ]);
     }
     
-    public function show(Task $task)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Task $task)
-    {
-        //
-    }
-
-    
-    public function update(Request $request, Task $task){
+    public function update(UpdateTaskRequest $request, Task $task){
         if ($task->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
             return response()->json(['message' => 'Não autorizado'], 403);
         }
 
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'due_date' => 'required|date|after_or_equal:today',
-            'is_done' => 'required|boolean',
-        ]);
+        $validatedData = $request->validated();
+
+        $oldUserId = $task->user_id;
 
         $task->update($validatedData);
+
+        if (isset($validatedData['user_id']) && $validatedData['user_id'] != $oldUserId) {
+            $newUser = User::find($validatedData['user_id']);
+            if ($newUser) {
+                $newUser->notify(new TaskNotification($task));
+            }
+        }
 
         return response()->json([
             'message' => 'Tarefa atualizada com sucesso',
