@@ -29,6 +29,11 @@ class TaskRequestService
         $query->when($request->filled('due_date'), fn($q) => $q->whereDate('due_date', $request->due_date));
         $query->when($request->filled('is_done'), fn($q) => $q->where('is_done', $request->is_done));
 
+        if ($user->is_admin && $request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+        
+
         return $query->orderBy('due_date')->paginate($request->get('per_page', 10));
     }
 

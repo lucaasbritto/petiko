@@ -14,6 +14,7 @@ export function useDashboardScript() {
   const editingTask = ref(null)
   const taskToView = ref(null)
   const taskViewOpen = ref(false)
+  const userOptions = ref([])
 
   const columns = computed(() => {
     const base = [
@@ -144,7 +145,14 @@ export function useDashboardScript() {
 
   onMounted(() => {
     requestStore.fetchRequests()
-    if (userStore.isAdmin) userStore.fetchUsuarios()
+    if (userStore.isAdmin) {
+      userStore.fetchUsuarios().then(() => {
+        userOptions.value = userStore.usuarios.map(user => ({
+          label: user.name,
+          value: user.id
+        }))
+      })
+    }
   })
 
   return {
@@ -165,5 +173,6 @@ export function useDashboardScript() {
     editingTask,
     taskViewOpen,
     openTaskView,
+    userOptions,
   }
 }

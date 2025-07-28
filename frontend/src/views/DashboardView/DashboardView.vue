@@ -52,6 +52,20 @@
           ]"
           @update:model-value="applyFilter('is_done', filters.is_done)"
         />
+
+        <q-select
+          v-if="userStore.isAdmin"
+          v-model="filters.user_id"
+          label="Usuário"
+          dense
+          outlined
+          emit-value
+          map-options
+          clearable
+          class="inputFilter q-mt-sm"
+          :options="userOptions"
+          @update:model-value="applyFilter('user_id', filters.user_id)"
+        />
       </div>
     </q-drawer>
     
@@ -210,6 +224,7 @@ const {
   taskViewOpen,
   taskToView,
   openTaskView,
+  userOptions,
 } = useDashboardScript()
 </script>
 
