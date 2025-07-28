@@ -86,6 +86,22 @@
               :rows-per-page-options="[10, 20, 50, 100]"
               style="color: #0083a0"
             >
+              <template v-slot:body-cell-title="props">
+                <q-td :props="props">
+                  <div class="truncate-text">
+                    {{ props.row.title }}
+                  </div>
+                </q-td>
+              </template>
+
+              <template v-slot:body-cell-description="props">
+                <q-td :props="props">
+                  <div class="truncate-text">
+                    {{ props.row.description }}
+                  </div>
+                </q-td>
+              </template>
+
               <template v-slot:body-cell-is_done="props">
                 <q-td :props="props">
                   <q-badge :color="getStatusColor(props.row)" rounded>
@@ -96,16 +112,27 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td class="q-pa-none" align="center">
-                   <div class="row no-wrap items-center justify-center q-gutter-xs">                  
+                   <div class="row no-wrap items-center justify-center q-gutter-xs">
+                    <q-btn
+                      flat
+                      dense
+                      icon="visibility"
+                      color="primary"
+                      @click="openTaskView(props.row)"
+                      size="sm"
+                    />
+
+                    <q-separator vertical inset/>
+                    
                     <q-btn
                       v-if="userStore.isAdmin" 
                       dense
                       flat
-                      round
                       icon="edit"
                       color="blue"
                       @click="openEditDialog(props.row)"
                       title="Editar tarefa"
+                      size="sm"
                     />
                     
                     <q-separator v-if="userStore.isAdmin" vertical inset/>
@@ -114,11 +141,11 @@
                       v-if="!props.row.is_done"
                       dense
                       flat
-                      round
                       icon="done"
                       color="green"
                       @click="confirmUpdated(props.row.id)"
                       title="Marcar como concluída"
+                      size="sm"
                     />
                     
                     <q-separator v-if="!props.row.is_done" vertical inset/>
@@ -126,11 +153,11 @@
                   <q-btn
                     dense
                     flat
-                    round
                     icon="delete"
                     color="red"
                     @click="confirmRemove(props.row.id)"
                     title="Remover tarefa"
+                    size="sm"
                   />
                   </div>
                 </q-td>
@@ -158,17 +185,27 @@
       </div>
     </q-page-container>
   </q-layout>
+
+  <TaskViewDialog v-model="taskViewOpen" :task="taskToView" :is-admin="Boolean(userStore.isAdmin)"/>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useDashboardScript } from './DashboardView.js'
 import { Dialog, Loading, Notify } from 'quasar'
 import TaskRequestFormDialog from '../../components/TaskRequestFormDialog.vue'
+import TaskViewDialog from '../../components/TaskViewDialog.vue'
 import { useUserStore } from '../../stores/user'
 
 const editingTask = ref(null)
 const userStore = useUserStore()
+const taskViewOpen = ref(false)
+const taskToView = ref(null)
+
+function openTaskView(task) {
+  taskToView.value = task
+  taskViewOpen.value = true
+}
 
 const {
   requestStore,
@@ -178,23 +215,27 @@ const {
   formatDateBR,
 } = useDashboardScript()
 
-const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left' },
-  { name: 'title', label: 'Título', field: 'title', align: 'left' },
-  { name: 'description', label: 'Descrição', field: 'description', align: 'left' },
-  { name: 'due_date', label: 'Data', field: row => formatDateBR(row.due_date), align: 'left' },
-  { name: 'is_done', label: 'Situação', field: 'is_done', align: 'left' },
-  { name: 'actions', label: 'Ações', field: 'actions', align: 'center' }
-]
+const columns = computed(() => {
+  const base = [
+    { name: 'id', label: 'ID', field: 'id', align: 'left' },
+    { name: 'title', label: 'Título', field: 'title', align: 'left' },
+    { name: 'description', label: 'Descrição', field: 'description', align: 'left' },
+    { name: 'due_date', label: 'Data', field: row => formatDateBR(row.due_date), align: 'left' },
+    { name: 'is_done', label: 'Situação', field: 'is_done', align: 'left' },
+    { name: 'actions', label: 'Ações', field: 'actions', align: 'center' }
+  ]
 
 if (userStore.isAdmin) {
-  columns.splice(5, 0, {
-    name: 'user_id',
-    label: 'Responsável',
-    field: row => row.user?.name || '-',
-    align: 'left',
-  })
-}
+    base.splice(5, 0, {
+      name: 'user_id',
+      label: 'Responsável',
+      field: row => row.user?.name || '-',
+      align: 'left',
+    })
+  }
+
+  return base
+})
 
 onMounted(() => {
   requestStore.fetchRequests()
@@ -325,5 +366,12 @@ function getStatusColor(task) {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.truncate-text {
+  max-width: 10vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
