@@ -6,6 +6,8 @@ use App\Models\Task\Task;
 use App\Models\User\User;
 use Illuminate\Http\Request;
 use App\Notifications\TaskNotification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 
 class TaskRequestService
 {
@@ -76,5 +78,47 @@ class TaskRequestService
     {
         $task->delete();
         return true;
+    }
+
+    
+    public function exportTasks()
+    {
+        $user = Auth::user();
+
+        $tasks = $user->is_admin
+            ? Task::with('user')->get()
+            : $user->tasks()->with('user')->get();
+
+        $csvHeader = ['ID', 'Título', 'Descrição', 'Data de Vencimento', 'Concluída', 'Responsável'];
+        $rows = [];
+
+        foreach ($tasks as $task) {
+            $rows[] = [
+                $task->id,
+                $task->title,
+                $task->description,
+                $task->due_date,
+                $task->is_done ? 'Sim' : 'Não',
+                $task->user?->name ?? '—',
+            ];
+        }
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $csvHeader);
+
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        $bom = chr(0xEF) . chr(0xBB) . chr(0xBF); // Adiciona BOM para UTF-8 com acentos
+
+        return Response::make($bom . $csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="tarefas.csv"',
+        ]);
     }
 }

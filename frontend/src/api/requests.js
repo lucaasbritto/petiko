@@ -24,3 +24,9 @@ export async function deleteRequest(id) {
    const response = await api.delete(`/task/${id}`)
    return response.data.data
 }
+
+export function exportTasks() {
+  return api.get('/task/export', {
+    responseType: 'blob',
+  })
+}

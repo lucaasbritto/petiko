@@ -17,6 +17,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/{task}', [TaskController::class, 'update']);
         Route::patch('/{id}/updateStatus', [TaskController::class, 'updateStatus']);
         Route::delete('/{task}', [TaskController::class, 'destroy']);
+        Route::get('/export', [TaskController::class, 'export']);
         
     });
 

@@ -83,6 +83,16 @@
           rounded
           dense
         />
+        <q-btn 
+          label="Exportar" 
+          icon="file_download" 
+          class="q-ml-sm"
+          style="background: #0083a0; color: white"
+          unelevated
+          rounded
+          dense
+          @click="downloadCSV" 
+        />
       </div>
 
           <q-card flat bordered class="q-pt-md" style="">
@@ -224,6 +234,7 @@ const {
   taskToView,
   openTaskView,
   userOptions,
+  downloadCSV,
 } = useDashboardScript()
 </script>
 

@@ -10,6 +10,7 @@ use App\Http\Requests\Task\TaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Notifications\TaskNotification;
 use App\Services\Task\TaskRequestService;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 
 class TaskController extends Controller
@@ -72,5 +73,10 @@ class TaskController extends Controller
         $this->service->deleteTask($task);
 
         return response()->json(['message' => 'Tarefa removida com sucesso']);
+    }
+
+
+    public function export(TaskRequestService $service){
+        return $service->exportTasks();
     }
 }

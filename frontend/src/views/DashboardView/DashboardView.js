@@ -4,6 +4,7 @@ import { useUserStore } from '../../stores/user'
 import { Dialog, Loading, Notify } from 'quasar'
 import TaskRequestFormDialog from '../../components/TaskRequestFormDialog.vue'
 import { formatDateBR, getStatusLabel, getStatusColor  } from '../../utils/taskUtils'
+import { exportTasks } from '../../api/requests'
 
 export function useDashboardScript() {
   const requestStore = useRequestStore()
@@ -116,6 +117,28 @@ export function useDashboardScript() {
     taskViewOpen.value = true
   }
 
+  function downloadCSV() {
+    exportTasks().then(response => {
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'tarefas.csv')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      Notify.create({
+        type: 'positive',
+        message: 'Exportação concluída com sucesso!',
+        color: 'green-6',
+        position: 'bottom',
+        timeout: 3000,
+        icon: 'check_circle'
+      })
+    }).catch(() => {
+      Notify.create({ type: 'negative', message: 'Erro ao exportar tarefas' })
+    })
+  }
+
 
   onMounted(() => {
     requestStore.fetchRequests()
@@ -147,5 +170,6 @@ export function useDashboardScript() {
     taskViewOpen,
     openTaskView,
     userOptions,
+    downloadCSV,
   }
 }
