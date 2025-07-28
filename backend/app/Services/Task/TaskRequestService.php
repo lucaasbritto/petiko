@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use App\Notifications\TaskNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
+use App\Events\TaskCreated;
+use App\Events\TaskUpdated;
+use App\Events\TaskDeleted;
 
 class TaskRequestService
 {
@@ -43,10 +46,7 @@ class TaskRequestService
     {
         $task = Task::create($input);
 
-        $user = User::find($task->user_id);
-        if ($user) {
-            $user->notify(new TaskNotification($task));
-        }
+        event(new TaskCreated($task));
 
         return $task;
     }
@@ -61,22 +61,17 @@ class TaskRequestService
 
     public function updateTask(Task $task, array $data)
     {
-        $oldUserId = $task->user_id;
         $task->update($data);
 
-        if (isset($data['user_id']) && $data['user_id'] != $oldUserId) {
-            $newUser = User::find($data['user_id']);
-            if ($newUser) {
-                $newUser->notify(new TaskNotification($task));
-            }
-        }
+        event(new TaskUpdated($task));
 
         return $task;
     }
 
     public function deleteTask(Task $task)
     {
-        $task->delete();
+         $task->delete();
+        event(new TaskDeleted($task));
         return true;
     }
 
