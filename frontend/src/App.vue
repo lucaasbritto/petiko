@@ -35,7 +35,7 @@
                   </q-item-section>
                   <q-item-section>
                     <q-item-label class="text-weight-medium">
-                      {{ n.data.title }}
+                      {{ n.data.message }}
                     </q-item-label>
                     <q-item-label caption>{{ formatDate(n.created_at) }}</q-item-label>
                   </q-item-section>
@@ -108,27 +108,31 @@ let firstFetchDone = false
     setInterval(async () => {
       if (!userStore.isAuthenticated) return
 
-      const oldIds = notificationStore.items.map(n => n.id)
-      await notificationStore.fetch()
+      const shownIds = JSON.parse(localStorage.getItem('shownNotificationIds') || '[]')
 
-      const newOnes = notificationStore.items.filter(n => !oldIds.includes(n.id))
+       await notificationStore.fetch()
+       const newOnes = notificationStore.items.filter(n => !shownIds.includes(n.id))
+
 
       if (!firstFetchDone) {
-        firstFetchDone = true
-        return
-      }
+          firstFetchDone = true
+          return
+        }
 
-      if (newOnes.length > 0) {
-        
-        new Audio('/sounds/notification.ogg').play().catch(() => {})
-        
-        Notify.create({
-          type: 'info',
-          message: "Você tem uma nova tarefa",
-          timeout: 3000,
-          position: 'top-right',
-          icon: 'notifications_active'
-        })
+        if (newOnes.length > 0) {
+        for (const notif of newOnes) {
+          Notify.create({
+            type: notif.data?.type,
+            message: notif.data?.title || 'Você tem uma nova notificação',
+            timeout: 3000,
+            position: 'top-right',
+            icon: 'notifications_active'
+          })
+          new Audio('/sounds/notification.ogg').play().catch(() => {})
+        }
+
+        const updatedShownIds = [...shownIds, ...newOnes.map(n => n.id)]
+        localStorage.setItem('shownNotificationIds', JSON.stringify(updatedShownIds))
       }
     }, 30000)
   })

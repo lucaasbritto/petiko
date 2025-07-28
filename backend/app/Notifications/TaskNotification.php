@@ -38,10 +38,12 @@ class TaskNotification extends Notification
     {
         return [
             'task_id' => $this->task->id,
-            'title' => $this->task->title,
+            'title' => "Você tem uma nova tarefa",
+            'title_task' => $this->task->title,
             'description' => $this->task->description,
             'assigned_by' => auth()->user()->name ?? 'Sistema',
-            'message' => 'Você recebeu uma nova tarefa: "' . $this->task->title . '"',
+            'message' => 'Você recebeu uma nova tarefa: "' . $this->task->id . '"',
+            'type' => "info",
             'created_at' => now()->toDateTimeString(),
         ];
     }
