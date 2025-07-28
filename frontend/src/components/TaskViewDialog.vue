@@ -25,15 +25,15 @@
                 <strong>Responsável:</strong> {{ task.user?.name || '—' }}
             </div>
             <div class="q-mt-sm"><strong>Situação:</strong>
-            <q-chip
-                :color="task.is_done ? 'green' : 'orange'"
-                text-color="white"
-                dense
-                square
-                class="q-ml-sm"
-            >
-                {{ task.is_done ? 'Concluída' : 'Pendente' }}
-            </q-chip>
+                <q-chip
+                    :color="task.is_done ? 'green' : (isVencida(task) ? 'red' : 'orange')"
+                    text-color="white"
+                    dense
+                    square
+                    class="q-ml-sm"
+                    >
+                    {{ task.is_done ? 'Concluída' : (isVencida(task) ? 'Pendente (Vencida)' : 'Pendente') }}
+                </q-chip>
             </div>
         </q-card-section>
 
@@ -52,6 +52,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
+import { isVencida, formatDateBR } from '../utils/taskUtils'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -65,9 +66,6 @@ function close() {
   emit('update:modelValue', false)
 }
 
-function formatDateBR(date) {
-  return new Date(date).toLocaleDateString('pt-BR')
-}
 </script>
 
 <style scoped>

@@ -3,6 +3,7 @@ import { useRequestStore } from '../../stores/requests'
 import { useUserStore } from '../../stores/user'
 import { Dialog, Loading, Notify } from 'quasar'
 import TaskRequestFormDialog from '../../components/TaskRequestFormDialog.vue'
+import { formatDateBR, getStatusLabel, getStatusColor  } from '../../utils/taskUtils'
 
 export function useDashboardScript() {
   const requestStore = useRequestStore()
@@ -42,33 +43,6 @@ export function useDashboardScript() {
     requestStore.setFilter(key, value)
   }
 
-  function formatDateBR(dateStr) {
-    if (!dateStr) return ''
-    const [year, month, day] = dateStr.split('T')[0].split('-')
-    return `${day}/${month}/${year}`
-  }
-
-  function isVencida(task) {
-    if (task.is_done) return false
-
-    const today = new Date()
-    const due = new Date(task.due_date)
-
-    const todayStr = today.toISOString().slice(0, 10)
-    const dueStr = due.toISOString().slice(0, 10)
-
-    return dueStr < todayStr
-  }
-
-  function getStatusLabel(task) {
-    if (isVencida(task)) return 'Vencida'
-    return task.is_done ? 'Concluída' : 'Pendente'
-  }
-
-  function getStatusColor(task) {
-    if (isVencida(task)) return 'red'
-    return task.is_done ? 'green' : 'orange'
-  }
 
   async function confirmAction(message = 'Tem certeza?') {
     return new Promise(resolve => {
@@ -161,7 +135,6 @@ export function useDashboardScript() {
     filters,
     pagination,
     columns,
-    formatDateBR,
     applyFilter,
     getStatusColor,
     getStatusLabel,
