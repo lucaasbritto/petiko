@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Notification;
 
 use Illuminate\Notifications\DatabaseNotification;
-use App\Models\User;
+use App\Models\User\User;
 
 class NotificationService
 {
 
     public function getAll(User $user){
-    
         return $user->notifications()->latest()->get();
     }
 

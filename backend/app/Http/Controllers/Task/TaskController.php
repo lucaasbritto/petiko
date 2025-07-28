@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Task;
 
-use App\Models\Task;
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Models\Task\Task;
+use App\Models\User\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\TaskRequest;
-use App\Http\Requests\UpdateTaskRequest;
-use App\Http\Requests\UpdateTaskRequestStatusRequest;
+use App\Http\Requests\Task\TaskRequest;
+use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Notifications\TaskNotification;
 use App\Services\Task\TaskRequestService;
 
@@ -22,7 +22,6 @@ class TaskController extends Controller
     }
     
     public function index(Request $request){
-       
         $tasks = $this->service->listTasks($request);
         return response()->json($tasks);
 

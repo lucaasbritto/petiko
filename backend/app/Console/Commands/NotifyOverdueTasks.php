@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Task;
-use App\Models\User;
+use App\Models\Task\Task;
+use App\Models\User\User;
 use App\Notifications\TaskOverdueNotification;
 use Carbon\Carbon;
 

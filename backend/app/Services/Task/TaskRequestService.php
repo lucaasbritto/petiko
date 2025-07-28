@@ -2,8 +2,8 @@
 
 namespace App\Services\Task;
 
-use App\Models\Task;
-use App\Models\User;
+use App\Models\Task\Task;
+use App\Models\User\User;
 use Illuminate\Http\Request;
 use App\Notifications\TaskNotification;
 

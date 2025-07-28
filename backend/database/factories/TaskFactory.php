@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Task;
-use App\Models\User;
+use App\Models\Task\Task;
+use App\Models\User\User;
 
 class TaskFactory extends Factory
 {
