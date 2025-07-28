@@ -6,6 +6,14 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use App\Events\TaskCreated;
+use App\Events\TaskUpdated;
+use App\Events\TaskDeleted;
+use App\Events\UserLoggedIn;
+use App\Listeners\NotifyUserOnTaskCreated;
+use App\Listeners\NotifyUserOnTaskUpdated;
+use App\Listeners\LogTaskDeletion;
+use App\Listeners\LogUserLoginListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,14 +26,17 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        \App\Events\TaskCreated::class => [
-            \App\Listeners\NotifyUserOnTaskCreated::class,
+        TaskCreated::class => [
+            NotifyUserOnTaskCreated::class,
         ],
-        \App\Events\TaskUpdated::class => [
-            \App\Listeners\NotifyUserOnTaskUpdated::class,
+        TaskUpdated::class => [
+            NotifyUserOnTaskUpdated::class,
         ],
-        \App\Events\TaskDeleted::class => [
-            \App\Listeners\LogTaskDeletion::class,
+        TaskDeleted::class => [
+            LogTaskDeletion::class,
+        ],
+        UserLoggedIn::class => [
+            LogUserLoginListener::class,
         ],
     ];
 

@@ -7,6 +7,7 @@ use App\Http\Requests\Login\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Events\UserLoggedIn;
 
 class AuthController extends Controller
 {
@@ -22,6 +23,8 @@ class AuthController extends Controller
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Email ou senha inválidos'], 401);
         }
+
+        event(new UserLoggedIn(auth()->user()));
 
         return response()->json([
             'access_token' => $token,
